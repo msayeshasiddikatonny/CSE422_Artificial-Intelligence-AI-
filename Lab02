@@ -1,0 +1,218 @@
+'''
+CSE422
+
+Artificial Intelligence
+
+Lab
+
+
+8- Queen
+
+8 X 8 2d board.
+Queens can be allocated that no queen can be attacked by another queen horizontally, vertically or diagonally
+Task
+
+Write a fitness function which checks the fitness of a board by checking the number of non-attacking pair of queens.   Hint: Maximum number of non-attacking pairs of queens can be (8*7)/2. Input: board, Output: a number telling the fitness of the board
+Write a Crossover function. A crossover function will take two boards, an index number as input and return two new boards.
+Write a Mutation function.
+Create a population of randomly generated boards.
+Randomly select two members of the population.
+Randomly generate an index number.  
+Call crossover function using the above two as input.  
+Call fitness function for the new boards from the output.
+Call mutation function if necessary.
+Add new members to a new population set if appropriate.
+Run 5 to 10 until the new population set is large enough.
+Select a few members from the old population to add to the new population set.
+Run 1- 12 until a board with highest fitness value is created.
+'''
+import numpy as np
+import random
+def fitness(population, n):
+
+  '''calculates the fitness score of each
+     of the individuals in the population
+     
+     returns a 1D numpy array: index referring to 
+     ith individual in population, and value referring 
+     to the fitness score.'''
+
+  fitness_list = []
+
+  for i  in population:
+      fitness_list.append(fitness_fun(i ))
+
+  return fitness_list
+def fitness_fun(individual):
+    N = len(individual)
+    maximum_number_of_non_attacking_pair_in_goal_state = (N * (N - 1)) / 2
+
+    attacking_pairs = 0
+
+    chess = np.zeros((N, N), dtype = int)
+
+    for column in range(N):
+        row = individual[column]
+        chess[row][column] = 1
+
+    for column in range(len(chess)):
+        for row in range(len(chess)):
+            if chess[row][column] == 1:
+                for column_right in range(column + 1, len(chess)):
+                    if chess[row][column_right] == 1:
+                        attacking_pairs += 1
+                    
+                column_right = column + 1
+                row_up = row - 1
+
+                while column_right < len(chess) and row_up >= 0:
+                    if chess[row_up][column_right] == 1:
+                        attacking_pairs += 1
+                    column_right += 1
+                    row_up -= 1
+
+                 
+                column_right = column + 1
+                row_down = row + 1
+                
+                while column_right < len(chess) and row_up < len(chess):
+                    if chess[row_up][column_right] == 1:
+                        attacking_pairs += 1
+                    column_right += 1
+                    row_down += 1
+
+    return maximum_number_of_non_attacking_pair_in_goal_state - attacking_pairs
+def select(population, fit):
+  ''' take input:  population and fit
+      fit contains fitness values of each of the individuals 
+      in the population  
+      
+      return:  one individual randomly giving
+      more weight to ones which have high fitness score'''
+  a = [0,1,2,3,4]
+  size = 1
+  p = [.31, .29, 0.26, 0.1,0.04]
+  select_bit=np.random.choice(a,size, True,p) 
+  
+
+  
+  return population[select_bit]
+def crossover(x, y):
+  '''take input: 2 parents - x, y. 
+     Generate a random crossover point. 
+     Append first half of x with second 
+     half of y to create the child
+     
+     returns: a child chromosome'''
+  new_list=[]
+  random_index=random.randint(0,len(x)-1)
+  for i in range(0,random_index):
+    new_list.append(x[i])
+  for i in range(random_index,len(y)):
+    new_list.append(y[i])
+
+
+
+  return new_list
+def mutate(child):
+  '''take input: a child
+     mutates a random 
+     gene into another random gene
+     
+     returns: mutated child'''
+  random_index=random.randint(0,len(x)-1)
+  random_value=random.randint(0,len(x)-1)
+  new_list=[]
+  for i in child:
+    new_list.append(i)
+  new_list[random_index]=random_value
+
+  return  new_list
+def GA(population, n, mutation_threshold = 0.3):
+  '''implement the pseudocode here by
+     calling the necessary functions- Fitness, 
+     Selection, Crossover and Mutation
+     
+     print: the max fitness value and the 
+     chromosome that generated it which is ultimately 
+     the solution board
+
+
+     repeat new_population  â†  empty set
+
+for  i=1  to size ( population ) do
+xâ† RANDOM-SELECTION ( population, FITNESS-FN )yâ† RANDOM-SELECTION ( population, FITNESS-FN )childâ†CROSSOVER(x,y) 
+
+if (some_random_number < mutation_threshold) then child â†  MUTATE ( child )
+
+add child to new_population
+
+population  â†  new_population
+
+until some individual is fit enough, or enough time has elapsed
+
+return the best individual in population, according to FITNESS-FN
+
+
+     '''
+
+ 
+  duration=0
+  generation = 1000
+
+  fit_one = None
+
+  while True:
+        new_population = []
+        fitness_list = fitness(population, len(population))
+        
+        numOfNon = len(population[0])
+        goal = (numOfNon * (numOfNon - 1)) / 2
+
+        best_fitness = max(fitness_list)
+        best_index = -1
+
+        for i in range(len(fitness_list)):
+            if best_fitness == fitness_list[i]:
+                best_index = i
+
+        if duration >= generation or best_fitness == goal:
+            selected_individual = ( duration, best_fitness, population[best_index])
+            break
+
+        for i in range(len(population)):
+            x = select(population, fitness_list)
+            y = select(population, fitness_list)
+            child = crossover(x, y)
+
+            random_digit= random.random()  
+
+            if (random_digit < mutation_threshold):
+                child = mutate(child)
+
+            new_population.append(child)
+
+        population = new_population
+        duration= duration + 1
+
+  return fit_one
+
+
+
+'''for 8 queen problem, n = 8'''
+n = 8
+
+'''start_population denotes how many individuals/chromosomes are there
+  in the initial population n = 8'''
+start_population = 10 
+
+'''if you want you can set mutation_threshold to a higher value,
+   to increase the chances of mutation'''
+mutation_threshold = 0.3
+
+'''creating the population with random integers between 0 to 7 inclusive
+   for n = 8 queen problem'''
+population = np.random.randint(0, n, (start_population, n))
+print(population)
+'''calling the GA function'''
+(GA(population, n, mutation_threshold))
