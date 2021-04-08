@@ -1,0 +1,100 @@
+# Lab task details
+# 1. Find your dataset above
+
+# 2. You can learn mode about your dataset searching online, but it is not something you have to do
+
+# 3. Load the dataset as dataframe using pandas
+
+# 4. Handle missing values if needed
+
+# 5. Encode categorical features if needed
+
+# 6. Scale all the values between 0-1 with proper scaling technique
+
+# 7. Split the dataset into features and labels. Use your intuition to determine which column indicates the labels.
+
+
+Do all these tasks in a ipython notebook. Copy all the code in a doc file and submit the doc file using the submission link.
+import pandas as pd
+import numpy as np
+glass = pd.read_csv(r"C:\Users\User\Downloads\Documents\glass source classification dataset.csv")
+glass=glass.drop(axis=1,columns='Unnamed: 0')
+glass.head(3)
+glass.shape
+glass.isnull().sum()
+'''
+no need to remove any col
+volunteer = volunteer.drop(['BIN', 'BBL', 'NTA'], axis = 1)
+volunteer.shape
+'''
+# Check how many values are missing in the category_desc column
+print("Number of rows with null values in Ca column: ", glass['Ca'].isnull().sum())
+
+# Subset the volunteer dataset
+
+glass_subset = glass[glass['Ca'].notnull()]
+
+# Print out the shape of the subset
+'''
+no need to remove null value
+print("Shape after removing null values: ", volunteer_subset.shape)
+print("Shape of dataframe before dropping:", volunteer.shape)
+volunteer = volunteer.dropna(axis = 0, subset = ['Ca'])
+print("Shape after dropping:", volunteer.shape)
+'''
+#volunteer.fillna(50)// no going to set directly number
+from sklearn.impute import SimpleImputer
+
+impute = SimpleImputer(missing_values=np.nan, strategy='mean')
+
+impute.fit(glass[['Ca']])
+
+glass['Ca'] = impute.transform(glass[['Ca']])
+glass
+glass.info()
+glass["Ba"].unique()
+glass["Fe"].unique()
+from sklearn.preprocessing import LabelEncoder
+
+# Set up the LabelEncoder object
+enc = LabelEncoder()
+
+# Apply the encoding to the "Accessible" column
+glass['Ba'] = enc.fit_transform(glass['Ba'])
+glass['Fe'] = enc.fit_transform(glass['Fe'])
+# Compare the two columns
+'''
+print(glass[['Ba']].head(40))
+print(glass[['Fe', 'Fe_enc']].head(40))
+'''
+'''
+#from sklearn.datasets import load_glass_source_classification_dataset 
+glass_set=  glass
+X_train, X_test, y_train, y_test = train_test_split(glass_set.data, glass_set.Na,random_state=1)
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+
+scaler.fit(X_train)
+
+# transform data
+X_train_scaled = scaler.transform(X_train)
+
+print("per-feature minimum before scaling:\n {}".format(X_train.min(axis=0)))
+print("per-feature maximum before scaling:\n {}".format(X_train.max(axis=0)))
+print("per-feature minimum after scaling:\n {}".format(X_train_scaled.min(axis=0)))
+print("per-feature maximum after scaling:\n {}".format(X_train_scaled.max(axis=0)))
+
+# transform test data
+X_test_scaled = scaler.transform(X_test)
+'''
+features=glass.drop(axis=1,columns='Type')
+features.head()
+label=glass[['Type']]
+label.head()
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+scaler.fit(features)
+feature_scaled=scaler.transform(features)
+feature_scaled_df=pd.DataFrame(feature_scaled,columns=list(glass.columns)[:-1])
+feature_scaled_df.head(50)
