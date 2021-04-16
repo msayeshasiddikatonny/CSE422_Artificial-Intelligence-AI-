@@ -1,0 +1,103 @@
+'''
+1. Collect the dataset you got for lab assignment 5
+2. Perform classification and calculate accuracy using logistic regression (Use sklearn library). Perform necessary pre-processing on the dataset before classification. Use 8:2 train-test split.
+3. Perform classification and calculate accuracy using decision tree (Use sklearn library). Perform necessary pre-processing on the dataset before classification. Use 8:2 train-test split.
+4. Compare the accuracy and plot them as a bar chart using matplotlib/seaborn
+ Previous
+'''
+import pandas as pd
+import numpy as np
+glass = pd.read_csv(r"C:\Users\User\Downloads\Documents\glass source classification dataset.csv")
+glass=glass.drop(axis=1,columns='Unnamed: 0')
+glass.head(3)
+glass.shape
+glass.isnull().sum()
+'''
+no need to remove any col
+volunteer = volunteer.drop(['BIN', 'BBL', 'NTA'], axis = 1)
+volunteer.shape
+'''
+# Check how many values are missing in the category_desc column
+print("Number of rows with null values in Ca column: ", glass['Ca'].isnull().sum())
+
+# Subset the volunteer dataset
+
+glass_subset = glass[glass['Ca'].notnull()]
+
+# Print out the shape of the subset
+'''
+no need to remove null value
+print("Shape after removing null values: ", volunteer_subset.shape)
+print("Shape of dataframe before dropping:", volunteer.shape)
+volunteer = volunteer.dropna(axis = 0, subset = ['Ca'])
+print("Shape after dropping:", volunteer.shape)
+'''
+#volunteer.fillna(50)// no going to set directly number
+from sklearn.impute import SimpleImputer
+
+impute = SimpleImputer(missing_values=np.nan, strategy='mean')
+
+impute.fit(glass[['Ca']])
+
+glass['Ca'] = impute.transform(glass[['Ca']])
+glass
+glass.info()
+glass["Ba"].unique()
+glass["Fe"].unique()
+glass["Type"].unique()
+from sklearn.preprocessing import LabelEncoder
+
+# Set up the LabelEncoder object
+enc = LabelEncoder()
+
+# Apply the encoding to the "Accessible" column
+glass['Ba'] = enc.fit_transform(glass['Ba'])
+glass['Fe'] = enc.fit_transform(glass['Fe'])
+glass['Type'] = enc.fit_transform(glass['Type'])
+
+# Compare the two columns
+label=glass[['Type']]
+label.head(80)
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+scaler.fit(features)
+feature_scaled=scaler.transform(features)
+feature_scaled_df=pd.DataFrame(feature_scaled,columns=list(glass.columns)[:-1])
+feature_scaled_df.head(50)
+#features=glass.drop(axis=1,columns='Type')
+glass.head(40)
+import matplotlib.pyplot as plt
+#import seaborn as sns
+from sklearn.linear_model import LogisticRegression
+#from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+#Prepare the training set
+data=glass
+# X = feature values, all the columns except the last column
+X = data.iloc[:, :-1]
+
+# y = target values, last column of the data frame
+y = data.iloc[:, -1]
+#Split the data into 80% training and 20% testing
+x_train, x_test, y_train, y_test = train_test_split(X.values, y.values, test_size=0.2, random_state=42)
+#Train the model
+model = LogisticRegression()
+model.fit(x_train, y_train) #Training the model
+predictions = model.predict(x_test)
+print(predictions)# printing predictions
+print( accuracy_score(y_test, predictions))
+f=accuracy_score(y_test, predictions)
+from sklearn.tree import DecisionTreeClassifier
+clf = DecisionTreeClassifier(criterion='entropy',random_state=1)
+clf.fit(x_train,y_train)
+y_pred = clf.predict(x_test)
+score=accuracy_score(y_pred,y_test)
+print(score)
+import matplotlib.pyplot as plt
+fig,ax = plt.subplots()
+ax.bar(['decision_tree','logistic_regression'],[score,f])
+ax.set_title('comparison_of_decisionTree and logistic_regression')
+ax.set_xlabel('method_name')
+ax.set_ylabel('accuracy')
+plt.show()
